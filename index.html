@@ -1,0 +1,98 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Race</title>
+		<style>
+		body {
+			font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+		}
+		#container {
+			width: 1208px;
+			position: absolute;
+			left: 50%;
+			margin-left: -604px;
+		}
+		#canvasContainer {
+			width: 1008px;
+			float: left;
+		}
+		#statsContainer {
+			width: 200px;
+			float: right;
+		}
+		.row {
+			width: inherit;
+			display: inline-block;
+		}
+		.border {
+			border: 4px solid #888;
+		}
+		.box {
+			display: block; 
+			width: 100%;
+			margin: 0px 5px;
+			margin-bottom: 5px;
+			padding: 5px;
+		}
+		.lapList {
+			height: 100px;
+			overflow-y: auto;
+		}
+		.canvas {
+			float: right;
+		}
+		.center {
+			text-align: center;
+		}
+		.hidden {
+			display: none;
+		}
+
+		a:visited {
+			color: #000;
+		}
+
+		a:hover {
+			color: #999;
+		}
+
+		span.b {
+			font-weight: bold;
+		}
+		</style>
+		<script>function keyHandler () { }</script>
+	</head>
+	<body onkeydown="keyHandler(event)" onkeyup="keyHandler(event)">
+		<div id="container">
+			<div id="canvasContainer">
+				<canvas id="raceTrack" width="750" height="500" class="border canvas"></canvas>
+			</div>
+			<div id="statsContainer">
+				<div class="border box">
+						Speed: <span id="speed" class="b">0.00</span> px/s <br>
+						Time: <span id="time" class="b">0.00</span> s <br>
+						Lap time <span id="lapTime" class="b">0.00</span> s <br>
+						Nr. of laps: <span id="nrLaps" class="b">0</span> <br>
+						<hr>
+						Lap times: <ol id="lapTimes" class="lapList"></ol>
+				</div>
+				<div class="border box">
+					Car: <select name="selectCar" onchange=""><option value="car1">Capsule</option></select><br>
+					Track: <select name="selectTrack" onchange="selectTrack();"></select>
+				</div>
+				<div class="border box">
+					FPS: <span id="fps"></span>
+				</div>
+			</div>
+			<div class="row center">
+				<p class="controls">Play with &larr; &uarr; &darr; &rarr; and [space] (handbrake).</p>
+			</div>
+			<div class="row center">
+				<small><a href="http://urosh.net/">urosh.net</a></small>
+			</div>
+		</div>
+		<div class="hidden"><img id="track"><img id="hiddenTrack"><canvas id="hiddenCanvas" width="750" height="500"></canvas></div>
+		<script src='race.js'></script>
+	</body>
+</html>
