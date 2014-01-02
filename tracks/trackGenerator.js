@@ -37,13 +37,12 @@ var width = 1500,
 			],
 	x, y, b;
 function finishTrack() {
-	// Start/Finish line
 	if (!hidden) {
 		c.fillStyle = '#000';
-		c.fillRect(790, 10, 10, 140);
+		c.fillRect(790, 10, 10, 2*r); // Start/Finish line
 	}
 }
-// */)
+// */
 /* /CONFIG */
 
 document.body.style.backgroundColor = '#ccc';
