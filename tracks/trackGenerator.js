@@ -1,42 +1,60 @@
-document.body.style.backgroundColor = '#ccc';
-var c = document.getElementById('track');
-c.width = 1000;
-c.height = 600;
-c = c.getContext('2d');
+var hidden = !true; // true => hidden, false => normal
 
-var hidden = false; // true => hidden, false => normal
+/* CONFIG */
+///* Track 1
+function initTrack() {
+	// Background color
+	c.fillStyle = '#90EE90';				// Normal
+	if (hidden) c.fillStyle = '#FFF';		// Hidden
+	c.fillRect(0, 0, node.width, node.height);
 
-// Background color
-c.fillStyle = '#90EE90';				// Normal
-if (hidden) c.fillStyle = '#FFF';		// Hidden
-c.fillRect(0, 0, 1000, 600);
-
-// Track color
-c.fillStyle = '#FEFEFE'; 				// Normal
-if (hidden) c.fillStyle = '#000000'; 	// Hidden
-
-var i = 60,
-	j = 60,
-	r = 50,
+	// Track color
+	c.fillStyle = '#FEFEFE'; 				// Normal
+	if (hidden) c.fillStyle = '#000000'; 	// Hidden
+}
+var width = 1500,
+	height = 800,
+	r = 70,
+	i = r + 10,
+	j = r + 10,
 	path = 	[ 
-				[ 190, 0 ],
-				[ 0, 240 ],
 				[ 300, 0 ],
-				[ 0, -240 ],
-				[ 390, 0 ],
-				[ 0, 480 ],
-				[ -140, 0 ],
-				[ 0, -340 ],
-				[ -110, 0 ],
+				[ 0, 280 ],
+				[ 300, 0 ],
+				[ 0, -280 ],
+				[ 700, 0 ],
+				[ 0, 580 ],
+				[ -160, 0 ],
+				[ 0, -300 ],
+				[ -180, 0 ],
 				[ 0, 250 ],
 				[ -240, 0 ],
-				[ 0, 90 ],
-				[ -390, 0 ],
-				[ 0, -480 ],
+				[ 0, 110 ],
+				[ -600, 0 ],
+				[ 0, -300 ],
+				[ -120, 0 ],
+				[ 0, -330 ]
 			],
 	x, y, b;
+function finishTrack() {
+	// Start/Finish line
+	if (!hidden) {
+		c.fillStyle = '#000';
+		c.fillRect(790, 10, 10, 140);
+	}
+}
+// */)
+/* /CONFIG */
 
-// Draw
+document.body.style.backgroundColor = '#ccc';
+var node = document.getElementById('track');
+node.width = width;
+node.height = height;
+c = node.getContext('2d');
+
+initTrack();
+
+/* DRAWING */
 for (var a = 0; a < path.length; a++) {
 	b = path[a];
 	x = i;
@@ -68,12 +86,9 @@ for (var a = 0; a < path.length; a++) {
 	
 	c.fill();
 }
+/* /DRAWING */
 
-// Start/Finish line
-if (!hidden) {
-	c.fillStyle = '#000';
-	if (r == 45) c.fillRect(895, 424, 2*r, 10);
-	if (r == 50) c.fillRect(890, 424, 2*r, 10);
-}
+finishTrack();
 
+// GENERATE URL
 document.getElementById('url').href = document.getElementById('track').toDataURL();

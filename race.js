@@ -15,19 +15,18 @@ function Car (x, y, alfa, color, maxVelocity, radius) {
 	this.r = radius == null ? 10 : radius;			// Radius
 
 	/* Car's representation */
-	this.repr = function (c) {
+	this.repr = function (c, x, y) {
 		c.fillStyle = this.color;
 		c.beginPath();
-		c.arc(Math.round(this.x), Math.round(this.y), this.r, -1 * Math.PI / 2 - this.alfa, Math.PI / 2 - this.alfa);
+		c.arc(Math.round(x), Math.round(y), this.r, -1 * Math.PI / 2 - this.alfa, Math.PI / 2 - this.alfa);
 		c.fill();
 	}
 
-	this.reprShadow = function(c) {
-		var shadow = this.shadow.shift();
+	this.reprShadow = function(c, x, y, alfa) {
 		c.globalAlpha = 0.5;
 		c.fillStyle = '#999';
 		c.beginPath();
-		c.arc(Math.round(shadow[0]), Math.round(shadow[1]), this.r, -1 * Math.PI / 2 - shadow[2], Math.PI / 2 - shadow[2]);
+		c.arc(Math.round(x), Math.round(y), this.r, -1 * Math.PI / 2 - alfa, Math.PI / 2 - alfa);
 		c.fill();
 		c.globalAlpha = 1;
 	}
@@ -131,9 +130,6 @@ function frame () {
 		setTimeout(frame, 500);	
 		return;
 	}
-	
-	// Redraw track	
-	c.drawImage(trackImg, 0, 0);
 
 	if (show === 'game') {
 		// Backup
@@ -219,24 +215,11 @@ function frame () {
 		}
 
 		car.newShadow.push([ car.x, car.y, car.alfa ]);
-
-		// GO!
-		if ((new Date()).getTime() - time < 3000) {
-			displayText('GO!', 100, 60);
-		}
 	} else if (show === 'menu') {
-		// Menu
-		displayText('Press [ENTER] to start!', 400, 60);
+		// Nothing to do here
 	} else if (show === '321') {
-		// 3, 2, 1
 		var diff = (new Date()).getTime() - countdown;
-		if (diff < 1000) {
-			displayText('3', 100, 60);
-		} else if (diff < 2000) {
-			displayText('2', 100, 60);
-		} else if (diff < 3000) {
-			displayText('1', 100, 60);
-		} else {
+		if (diff >= 3000) {
 			time = (new Date()).getTime();
 			lapTime = time;
 
@@ -247,14 +230,52 @@ function frame () {
 		return;
 	}
 
+	// Track's offset
+	var trackOffsetX = car.x - cNode.width / 2,
+		trackOffsetY = car.y - cNode.height / 2;
+
+	// Fix offset
+	if (trackOffsetX < 0) trackOffsetX = 0;
+	if (trackOffsetX > track.w - cNode.width) trackOffsetX = track.w - cNode.width;
+	if (trackOffsetY < 0) trackOffsetY = 0;
+	if (trackOffsetY > track.h - cNode.height) trackOffsetY = track.h - cNode.height;
+
+	// Car's relative position to canvas
+	var rX = car.x - trackOffsetX,
+		rY = car.y - trackOffsetY;
+
+	/* REDRAW EVERYTHING */
+	// Redraw map
+	wipeCanvas();
+	c.drawImage(trackImg, -trackOffsetX, -trackOffsetY);
+
 	// Shadow
-	if (car.shadow.length > 0) car.reprShadow(c);
+	if (car.shadow.length > 0) {
+		var shadow = car.shadow.shift();
+			car.reprShadow(c, shadow[0] - trackOffsetX, shadow[1] - trackOffsetY, shadow[2]);
+	}
 
 	// Draw
-	car.repr(c);
+	car.repr(c, rX, rY);
+
+	if (show === 'game') {
+		// GO!
+		if ((new Date()).getTime() - time < 3000) {
+			displayText('GO!', 100, 60);
+		}
+	} else if (show === 'menu') {
+		displayText('Press [ENTER] to start!', 400, 60);
+	} else if (show === '321') {
+		if (diff < 1000) {
+			displayText('3', 100, 60);
+		} else if (diff < 2000) {
+			displayText('2', 100, 60);
+		} else if (diff < 3000) {
+			displayText('1', 100, 60);
+		}
+	}
 
 	f++;
-	
 	requestAnimationFrame(frame);
 }
 
@@ -283,11 +304,17 @@ function loadTrack(id) {
 	track = tracks[id];
 
 	// Car
+	car = new Car(0, 0);
 	car.x = track.x;
 	car.y = track.y;
 	car.alfa = track.alfa;
 	car.shadow = [];
 	car.newShadow = [];
+
+	if (track.name == 'Track 1') {
+		car.r = 14;
+		car.maxVelocity = 6;
+	}
 
 	// Remove old img node
 	var node = document.getElementById('track');
@@ -310,10 +337,8 @@ function loadTrack(id) {
 	node.setAttribute('src', track.filenameHidden);
 	parent.appendChild(node);
 
-	c = document.getElementById('raceTrack');
-	c.width = track.w;
-	c.height = track.h;
-	c = c.getContext('2d');
+	cNode = document.getElementById('raceTrack');
+	c = cNode.getContext('2d');
 
 	hiddenCanvas = document.getElementById('hiddenCanvas')
 	hiddenCanvas.width = track.w;
@@ -391,15 +416,15 @@ function displayText (text, x, y, fontSize) {
 	c.fillStyle = '#EEE';
 	c.strokeStyle = '#666';
 	c.globalAlpha = 0.25;
-	var x0 = Math.round(track.w / 2 - x / 2);
-	var y0 = Math.round(track.h / 2 - y / 2);
+	var x0 = Math.round(cNode.width / 2 - x / 2);
+	var y0 = Math.round(cNode.height / 2 - y / 2);
 	c.fillRect(x0, y0, x, y - Math.round(fontSize / 2));
 	c.strokeRect(x0, y0, x, y - Math.round(fontSize / 2));
 	c.globalAlpha = 1;
 
 	c.font = fontSize + "px Arial";
 	c.fillStyle = '#000';
-	c.fillText(text, Math.round(track.w / 2), Math.round(track.h / 2));
+	c.fillText(text, Math.round(cNode.width / 2), Math.round(cNode.height / 2));
 }
 
 /*
@@ -408,7 +433,7 @@ function displayText (text, x, y, fontSize) {
 function wipeCanvas () {
 	var temp = c.fillStyle;
 	c.fillStyle = "#FFF";
-	c.fillRect(0, 0, track.w, track.h);
+	c.fillRect(0, 0, cNode.width, cNode.height);
 	c.fillStyle = temp;
 }
 
@@ -465,12 +490,11 @@ function insideRectangle (x, y, array) {
 
 var tracks = [
 				new Track('Track 0', 'track0', 1000, 600, 942, 450, null, null, {'start' : [875, 995, 425, 435], '1' : [875, 995, 250, 260], '2' : [875, 995, 100, 110] }),
-				new Track('Track 1', 'track1', 750, 500, 675, 280, null, null, { 'start' : [615, 748, 260, 270], '1' : [360, 370, 5, 130], '2' : [340, 350, 380, 498] }),
-				new Track('Track 2', 'track2', 750, 520, 680, 270, - Math.PI / 2, null, { 'start' : [635, 745, 290, 300], '1' : [620, 630, 390, 498], '2' : [400, 410, 5, 125] }),
+				new Track('Track 1', 'track', 1500, 800, 770, 80, 0, null, { 'start' : [790, 800, 5, 160], '1' : [850, 860, 5, 160], '2' : [900, 910, 5, 160] }),
 				new Track('Speedway', 'speedway', 1000, 600, 925, 300, null, null, { 'start' : [835, 990, 290, 300], '1' : [510, 540, 10, 200], '2' : [480, 490, 400, 559] }),
 				new Track('Infinity', 'infinity', 1000, 600, 550, 250, null, infiniteTrack)
 			 ],
-	track, c, hiddenCanvas, trackImg,
+	track, c, cNode, hiddenCanvas, trackImg,
 	car = new Car(0, 0),
 	trackLoaded1, trackLoaded2, trackLoaded, 
 	trackImageData,
@@ -502,7 +526,7 @@ var f, fpsTime, fpsElement = document.getElementById('fps');
 var debug = false;
 
 // Load track
-loadTrack(0);
+loadTrack(1);
 
 // Select track
 var selected, 
