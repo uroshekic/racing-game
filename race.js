@@ -9,7 +9,7 @@ function Car (x, y, alfa, color, maxVelocity, radius) {
 	this.v0 = 0.5;				//
 
 	this.a = 1.025;				// Acceleration pixels/frame^2
-	this.maxVelocity = maxVelocity == null ? 5 : maxVelocity;	// Maximum velocity
+	this.maxVelocity = maxVelocity == null ? 4 : maxVelocity;	// Maximum velocity
 
 	this.color = color == null ? '#4A96AD' : color;	// Car's color
 	this.r = radius == null ? 10 : radius;			// Radius
@@ -313,7 +313,7 @@ function loadTrack(id) {
 
 	if (track.name == 'Track 1') {
 		car.r = 14;
-		car.maxVelocity = 6;
+		car.maxVelocity += 1;
 	}
 
 	// Remove old img node
